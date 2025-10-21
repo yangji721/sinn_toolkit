@@ -1,0 +1,11 @@
+torch>=1.13
+torchvision
+numpy
+pillow
+einops
+tqdm
+bcos  # recommended: pip install -e /path/to/B-cos-v2 or pip install bcos
+# Optional (for training/dev):
+# timm
+# wandb
+# captum
