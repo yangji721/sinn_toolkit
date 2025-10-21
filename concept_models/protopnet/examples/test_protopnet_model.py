@@ -66,3 +66,74 @@ def test_protopnet_model():
 
 if __name__ == '__main__':
     test_protopnet_model()
+
+    # ----------------- Small training demo -----------------
+    def train_demo(model, device, epochs=2, batch_size=8, lr=1e-3):
+        """Tiny training loop on synthetic data to demonstrate API."""
+        model.train()
+
+        # infer input channels
+        mm = model.module if hasattr(model, 'module') else model
+        in_ch = 3
+        import torch.nn as nn
+        for layer in mm.modules():
+            if isinstance(layer, nn.Conv2d):
+                in_ch = layer.in_channels
+                break
+
+        # infer number of classes via forward
+        with torch.no_grad():
+            sample = torch.randn(1, in_ch, img_size, img_size).to(device)
+            out = model(sample)
+            if isinstance(out, (tuple, list)):
+                out = out[0]
+            n_classes = out.shape[1]
+
+        # synthetic dataset
+        N = 64
+        X = torch.randn(N, in_ch, img_size, img_size)
+        y = torch.randint(0, n_classes, (N,))
+        from torch.utils.data import TensorDataset, DataLoader
+        ds = TensorDataset(X, y)
+        loader = DataLoader(ds, batch_size=batch_size, shuffle=True)
+
+        optimizer = torch.optim.Adam(model.parameters(), lr=lr)
+        criterion = torch.nn.CrossEntropyLoss()
+
+        for epoch in range(epochs):
+            total_loss = 0.0
+            total_correct = 0
+            total = 0
+            for xb, yb in loader:
+                xb = xb.to(device)
+                yb = yb.to(device)
+                optimizer.zero_grad()
+                outputs = model(xb)
+                if isinstance(outputs, (tuple, list)):
+                    logits = outputs[0]
+                else:
+                    logits = outputs
+                loss = criterion(logits, yb)
+                loss.backward()
+                optimizer.step()
+                total_loss += loss.item() * xb.size(0)
+                _, preds = logits.max(1)
+                total_correct += (preds == yb).sum().item()
+                total += xb.size(0)
+
+            print(f"Epoch {epoch+1}/{epochs} - loss: {total_loss/total:.4f}, acc: {total_correct/total:.4f}")
+
+    # run a short demo if invoked as script
+    if __name__ == '__main__':
+        # create model again for training demo to ensure fresh state
+        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        model_for_train = ProtoPNetModelAdapter(
+            base_architecture=base_architecture,
+            num_classes=num_classes,
+            prototype_shape=prototype_shape,
+            img_size=img_size
+        ).to(device)
+        try:
+            train_demo(model_for_train, device, epochs=2, batch_size=8, lr=1e-3)
+        except Exception as e:
+            print('Training demo failed:', e)

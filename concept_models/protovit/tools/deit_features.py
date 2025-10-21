@@ -9,7 +9,7 @@ from timm.models.vision_transformer import VisionTransformer, _cfg
 from timm.models import create_model
 from timm.models.registry import register_model
 from timm.models.layers import trunc_normal_
-from settings import dropout_rate
+from concept_models.protovit.settings import dropout_rate
 
 __all__ = [
     'deit_tiny_patch16_224', 'deit_small_patch16_224', 'deit_base_patch16_224',

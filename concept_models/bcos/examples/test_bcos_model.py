@@ -17,6 +17,7 @@ from bcos.data.presets import ImageNetClassificationPresetEval
 from bcos.common import explanation_mode, gradient_to_image, plot_contribution_map
 from PIL import Image
 import numpy as np
+from torch.utils.data import DataLoader, TensorDataset
 
 # For this example we'll use the factory to obtain a model adapter directly.
 # Use ImageNetClassificationPresetEval with a crop_size matching the model (224 for resnet50).
@@ -114,6 +115,87 @@ def main():
         print("Train helper prepared. Call train(train_args) to execute a dev training run.")
     except Exception as e:
         print("Train helper not executed in example (to avoid heavy operations)", e)
+
+    # ------------------ Simple training demo (lightweight, synthetic data) ------------------
+    def train_demo(model, device, epochs=2, batch_size=8, lr=1e-3):
+        """Train the given model on tiny synthetic data to demonstrate a training loop.
+
+        This is only a demonstration: it uses random inputs and labels and runs a
+        couple of epochs to show optimizer / loss / backward usage.
+        """
+        print(f"\nStarting a tiny training demo: epochs={epochs}, batch_size={batch_size}")
+
+        # Try to infer number of classes from a forward pass if possible
+        model.train()
+        # infer expected input channels by locating the first Conv2d in the model
+        def _infer_in_channels(model):
+            mm = model.module if hasattr(model, 'module') else model
+            import torch.nn as nn
+            for layer in mm.modules():
+                if isinstance(layer, nn.Conv2d):
+                    return layer.in_channels
+            return 3
+
+        in_ch = _infer_in_channels(model)
+
+        # create a small batch to infer output size using the correct channel count
+        with torch.no_grad():
+            try:
+                sample = torch.randn(1, in_ch, 224, 224).to(device)
+                out = model(sample)
+                # if model returns tuple/list, take first element as logits
+                if isinstance(out, (tuple, list)):
+                    out = out[0]
+                n_classes = out.shape[1]
+            except Exception:
+                # fallback
+                n_classes = 1000
+
+        # Create synthetic dataset
+        N = 64
+        X = torch.randn(N, in_ch, 224, 224)
+        y = torch.randint(0, n_classes, (N,))
+        ds = TensorDataset(X, y)
+        loader = DataLoader(ds, batch_size=batch_size, shuffle=True)
+
+        # Simple optimizer and loss
+        optimizer = torch.optim.SGD(model.parameters(), lr=lr)
+        criterion = torch.nn.CrossEntropyLoss()
+
+        # training loop
+        for epoch in range(epochs):
+            running_loss = 0.0
+            running_correct = 0
+            running_total = 0
+            for xb, yb in loader:
+                xb = xb.to(device)
+                yb = yb.to(device)
+                optimizer.zero_grad()
+                outputs = model(xb)
+                # some adapters return (logits, extras) or similar; handle that
+                if isinstance(outputs, tuple) or isinstance(outputs, list):
+                    logits = outputs[0]
+                else:
+                    logits = outputs
+                loss = criterion(logits, yb)
+                loss.backward()
+                optimizer.step()
+                running_loss += loss.item() * xb.size(0)
+                _, preds = logits.max(1)
+                running_correct += (preds == yb).sum().item()
+                running_total += xb.size(0)
+
+            epoch_loss = running_loss / running_total
+            epoch_acc = running_correct / running_total
+            print(f"Epoch {epoch+1}/{epochs}: loss={epoch_loss:.4f}, acc={epoch_acc:.4f}")
+
+        print("Tiny training demo finished. (This used synthetic random data.)")
+
+    # Run the tiny training demo (short)
+    try:
+        train_demo(model, device, epochs=2, batch_size=8, lr=1e-3)
+    except Exception as e:
+        print('Training demo failed (likely due to adapter shape/requirements):', e)
 
 if __name__ == '__main__':
     main()

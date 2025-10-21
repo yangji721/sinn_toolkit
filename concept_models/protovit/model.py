@@ -4,8 +4,11 @@ import torch.nn as nn
 import torch.utils.model_zoo as model_zoo
 import torch.nn.functional as F
 
-from ProtoViT.tools.deit_features import deit_tiny_patch_features, deit_small_patch_features
-from ProtoViT.tools.cait_features import cait_xxs24_224_features
+import os
+import sys
+
+from concept_models.protovit.tools.deit_features import deit_tiny_patch_features, deit_small_patch_features
+from concept_models.protovit.tools.cait_features import cait_xxs24_224_features
 
 base_architecture_to_features = {'deit_small_patch16_224': deit_small_patch_features,
                                  'deit_tiny_patch16_224': deit_tiny_patch_features,
