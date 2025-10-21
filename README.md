@@ -6,7 +6,7 @@ This repository offers a compact toolkit that integrates various self-interpreta
 
 * **Unified Adapter Interfaces**: The toolkit includes adapters for the following models under `concept_models/*`:
 
-  * **`bcos` (B-cos)**: Adapter for the B-cos package (recommended via editable install)
+  * **`bcos` (B-cos)**
   * **`protopnet` (ProtoPNet)**
   * **`protopool` (ProtoPool)**
   * **`tesnet` (TesNet)**
@@ -32,10 +32,6 @@ Each adapter exposes a small contract as defined in `concept_models/base.py`:
    pip install -r requirements.txt
    ```
 
-### Notes about `bcos` and This Repository
-
-* `concept_models.bcos` serves as an adapter that attempts to import the top-level `bcos` package (either the installed or editable package). This keeps the adapter lightweight while allowing you to develop within the original `B-cos-v2` repository.
-
 ## Quick Usage Example
 
 ```python
@@ -51,25 +47,20 @@ model = create_model('resnet50', pretrained_weights=True)
 
 ## Provenance and Papers
 
-* **B-cos (B-cos toolkit)**
-  Original Repository: `B-cos-v2` (this repo contains a copy)
-  Paper: ["B-cos Alignment for Inherently Interpretable CNNs and Vision Transformers"](https://ieeexplore.ieee.org/document/9736579), TPAMI 2024.
+* **B-cos**
+  Paper: ["B-cos Alignment for Inherently Interpretable CNNs and Vision Transformers"](https://ieeexplore.ieee.org/iel7/34/10522060/10401936.pdf), TPAMI 2024.
 
 * **ProtoPNet**
-  Original Code: ProtoPNet-Concept_final
-  Paper: ["This Looks Like That: Deep Learning for Interpretable Image Recognition"](https://papers.nips.cc/paper/8843-this-looks-like-that-deep-learning-for-interpretable-image-recognition), NeurIPS 2019.
+  Paper: ["This Looks Like That: Deep Learning for Interpretable Image Recognition"](http://papers.neurips.cc/paper/9095-this-looks-like-that-deep-learning-for-interpretable-image-recognition.pdf), NeurIPS 2019.
 
 * **ProtoPool**
-  Original Code: ProtoPool-Concept_final
-  Paper: ["ProtoPool: Interpretable Image Classification with Differentiable Prototypes Assignment"](https://openaccess.thecvf.com/content/ECCV_2022/html/Yu_ProtoPool_Interpretable_Image_Classification_With_Differentiable_Prototypes_Assignment_ECCV_2022_paper.html), ECCV 2022.
+  Paper: ["ProtoPool: Interpretable Image Classification with Differentiable Prototypes Assignment"](https://www.ecva.net/papers/eccv_2022/papers_ECCV/papers/136720346.pdf), ECCV 2022.
 
 * **TesNet**
-  Original Code: TesNet-Concept_final
-  Paper: ["Interpretable Image Recognition by Constructing Transparent Embedding Space"](https://openaccess.thecvf.com/content/ICCV_2021/html/Liu_Interpretable_Image_Recognition_by_Constructing_Transparent_Embedding_Space_ICCV_2021_paper.html), ICCV 2021.
+  Paper: ["Interpretable Image Recognition by Constructing Transparent Embedding Space"](https://openaccess.thecvf.com/content/ICCV2021/papers/Wang_Interpretable_Image_Recognition_by_Constructing_Transparent_Embedding_Space_ICCV_2021_paper.pdf), ICCV 2021.
 
 * **ProtoViT**
-  Original Code: ProtoViT
-  Paper: ["Interpretable Image Classification with Adaptive Prototype-based Vision Transformers"](https://papers.nips.cc/paper/10704-interpretable-image-classification-with-adaptive-prototype-based-vision-transformers), NeurIPS 2024.
+  Paper: ["Interpretable Image Classification with Adaptive Prototype-based Vision Transformers"](https://neurips.cc/virtual/2024/poster/94047), NeurIPS 2024.
 
 ## Files Changed in This Repository to Produce the Unified Adapters
 
@@ -100,7 +91,3 @@ If you maintain a conda environment, use the provided environment `.yml` files f
 ## License
 
 This project integrates code from several upstream repositories. Each module retains its original license. The repository's top-level code is provided under the Apache-2.0 license. When reusing code from papers, please adhere to their respective license and citation guidelines.
-
----
-
-This version cleans up the content for better readability and organization, while emphasizing the core details. Let me know if you need further adjustments!
